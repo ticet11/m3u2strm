@@ -1,4 +1,3 @@
-import asyncio
 import logger
 import os
 import re
@@ -91,7 +90,7 @@ class TVEpisode(object):
     :returns: the fully constructed filename with type directory ea. "tvshows/Star Trek the Next Generation - Season 02/Star Trek the Next Generation - S02E07 - The Borgs kill Picard - 1080p.strm"
     :rtype: str
     '''
-    filestring = [self.showtitle.replace(':','-').replace('*','_').replace('/','_').replace('?','')]
+    filestring = [tools.sanitizeString(self.showtitle)]
     if self.airdate:
       filestring.append(self.airdate.strip())
     else:
@@ -103,9 +102,9 @@ class TVEpisode(object):
     if self.resolution:
       filestring.append(self.resolution.strip())
     if self.seasonnumber:
-      return ('tvshows/' + self.showtitle.strip().replace(':','-').replace('/','_').replace('*','_').replace('?','') + "/" + self.showtitle.strip().replace(':','-').replace('/','-').replace('*','_').replace('?','') + " - Season " + str(self.seasonnumber.strip()) + '/' + ' - '.join(filestring).replace(':','-').replace('*','_') + ".strm")
+      return ('tvshows/' + filestring[0] + "/" + filestring[0] + " - Season " + str(self.seasonnumber.strip()) + '/' + ' - '.join(filestring) + ".strm")
     else:
-      return ('tvshows/' + self.showtitle.strip().replace(':','-').replace('/','_').replace('*','_').replace('?','') +"/" +' - '.join(filestring).replace(':','-').replace('*','_') + ".strm")
+      return ('tvshows/' + filestring[0] +"/" +' - '.join(filestring) + ".strm")
   
   def makeStream(self):
     filename = self.getFilename()
@@ -212,14 +211,12 @@ class rawStreamList(object):
       self.parseLiveStream(streaminfo, streamURL)
   
   def parseVodTv(self, streaminfo, streamURL):
-    #print(streaminfo)
     title = tools.infoMatch(streaminfo)
     if title:
-      title = tools.parseMovieInfo(title.group())
+      title = tools.parseMovieInfo(title)
     resolution = tools.resolutionMatch(streaminfo)
     if resolution:
       resolution = tools.parseResolution(resolution)
-      #print(resolution)
       title = tools.stripResolution(title)
     episodeinfo = tools.parseEpisode(title)
     if episodeinfo:
