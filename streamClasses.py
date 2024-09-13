@@ -21,14 +21,14 @@ class Movie(object):
     self.year = year
     self.resolution = resolution
     self.language = language
-
+    
   def getFilename(self):
     '''Getter to get the filename for the stream file
     
     :returns: the fully constructed filename with type directory ea. "movies/The Longest Yard - 720p.strm"
     :rtype: str
     '''
-    filestring = [self.title.replace(':','-').replace('*','_').replace('/','_').replace('?','')]
+    filestring = [tools.sanitizeString(self.title)]
     if self.year:
       if self.year[0] == "(":
         filestring.append(self.year)
@@ -39,7 +39,7 @@ class Movie(object):
       self.year = "A"
     if self.resolution:
       filestring.append(self.resolution)
-    return ('movies/' + self.title.replace(':','-').replace('*','_').replace('/','_').replace('?','') + ' - ' + self.year + "/" + ' - '.join(filestring) + ".strm")
+    return ('movies/' + filestring[0] + ' - ' + self.year + "/" + ' - '.join(filestring) + ".strm")
   
   def makeStream(self):
     filename = self.getFilename()
@@ -244,7 +244,6 @@ class rawStreamList(object):
     pass
 
   def parseVodMovie(self, streaminfo, streamURL):
-    #todo: add language parsing for |LA| and strip it
     title = tools.parseMovieInfo(streaminfo)
     resolution = tools.resolutionMatch(streaminfo)
     if resolution:
@@ -257,10 +256,11 @@ class rawStreamList(object):
     if language:
       title = tools.stripLanguage(title)
       language = language.group().strip()
-    moviestream = Movie(title, streamURL, year=year, resolution=resolution, language=language)
-    print(moviestream.__dict__, "MOVIE")
-    print(moviestream.getFilename())
-    moviestream.makeStream()
+    if type(title) is not type(None) and title != '()':
+      moviestream = Movie(title, streamURL, year=year, resolution=resolution, language=language)
+      print(moviestream.__dict__, "MOVIE")
+      print(moviestream.getFilename())
+      moviestream.makeStream()
 
 
 

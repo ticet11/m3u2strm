@@ -7,6 +7,13 @@ def verifyURL(line):
     return True
   return
 
+def sanitizeString(string):
+  invalid_characters = ['<', '>', ':', '"', '/', '\\', '|', '?', '*']
+  pattern = re.compile('|'.join(re.escape(char) for char in invalid_characters))
+  sanitized_string = pattern.sub('_', string)
+  return sanitized_string
+
+
 def tvgTypeMatch(line):
   typematch = re.compile('tvg-type=\"(.*?)\"', re.IGNORECASE).search(line)
   if typematch:
@@ -138,9 +145,10 @@ def parseMovieInfo(info):
     info = info.split(',')
   if info[0] == "":
     del info[0]
-  info = info[-1]
-  if '#' in info:
-    info = info.split('#')[0]
+  del info[0]
+  info = ''.join(info)
+  if '#EXT' in info:
+    info = info.split('#EXT')[1]
   if ':' in info:
     info = info.split(':')
     if resolutionMatch(info[0]):
@@ -172,15 +180,16 @@ def makeDirectory(directory):
     print("directory found:", directory)
 
 def stripYear(title):
-  yearmatch = re.sub('[(][1-2][0-9][0-9][0-9][)]|[1-2][0-9][0-9][0-9]', "", title)
+  yearmatch = re.sub('[(][1-2][0-9][0-9][0-9][)]', "", title)
   if yearmatch:
     return yearmatch.strip()
   return
 
 def languageMatch(line):
-  languagematch = re.compile('[|][A-Z][A-Z][|]', re.IGNORECASE).search(line)
-  if languagematch:
-    return languagematch
+  if isinstance(line, str):
+    languagematch = re.compile('[|][A-Z][A-Z][|]', re.IGNORECASE).search(line)
+    if languagematch:
+      return languagematch
   return
 
 def stripLanguage(title):
