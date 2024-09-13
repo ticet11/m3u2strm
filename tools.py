@@ -10,9 +10,8 @@ def verifyURL(line):
 def sanitizeString(string):
   invalid_characters = ['<', '>', ':', '"', '/', '\\', '|', '?', '*']
   pattern = re.compile('|'.join(re.escape(char) for char in invalid_characters))
-  sanitized_string = pattern.sub('_', string)
+  sanitized_string = pattern.sub('_', string).strip()
   return sanitized_string
-
 
 def tvgTypeMatch(line):
   typematch = re.compile('tvg-type=\"(.*?)\"', re.IGNORECASE).search(line)
@@ -57,7 +56,8 @@ def tvgGroupMatch(line):
   return
       
 def infoMatch(line):
-  infomatch = re.compile('[,](?!.*[,])(.*?)$', re.IGNORECASE).search(line)
+  infomatch = line.split(',', 1)
+  infomatch = infomatch[1]
   if infomatch:
     return infomatch
   return
@@ -141,11 +141,12 @@ def imdbCheck(line):
   return
 
 def parseMovieInfo(info):
-  if ',' in info:
-    info = info.split(',')
+  if ' ,' in info:
+    info = info.split(' ,')
   if info[0] == "":
     del info[0]
-  del info[0]
+  if type(info) != str:
+    del info[0]
   info = ''.join(info)
   if '#EXT' in info:
     info = info.split('#EXT')[1]
@@ -216,6 +217,7 @@ def parseEpisode(title):
   showtitle, episodetitle, language = None, None, None
   if airdate:
     showtitle = title[:airdate.start()].strip()
+    print('parseEpisode showtitle: ' + showtitle)
     if airdate.end() != titlelen:
       episodetitle = title[airdate.end():].strip()
     return [showtitle,episodetitle,airdate.group()]
