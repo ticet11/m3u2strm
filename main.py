@@ -5,6 +5,8 @@ import os
 import requests
 
 dotenv.load_dotenv() # load environment variables from .env file
+
+# TV Shows conversion
 tv_m3u_url = os.getenv("TV_M3U_URL")
 i = 1
 while i > 0:
@@ -25,6 +27,7 @@ while i > 0:
     except requests.RequestException as e:
         print(f"Failed to reach URL '{url}'. Error: {e}")
 
+# Movies conversion
 movies_m3u_url = os.getenv(
     "MOVIES_M3U_URL"
 )  # your M3U_URL variables should get set in your .env file before running
